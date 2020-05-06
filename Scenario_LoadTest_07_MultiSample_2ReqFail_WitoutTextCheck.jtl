@@ -1,0 +1,4 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1588670828098,39,BP01_BikeCounterStatus,401,"Number of samples in transaction : 2, number of failing samples : 2",Thread Group 1-1,,false,,444,1304,1,1,null,0,89,0
+1588670828162,34,Req_BikeCounterStatus,401,Unauthorized,Thread Group 1-1,text,false,,222,630,1,1,http://192.168.161.119/bikes/sib/v1/counterstatus,32,0,21
+1588670828222,5,Req_eIACSTransactionTime,401,Unauthorized,Thread Group 1-1,text,false,,222,674,1,1,http://192.168.161.119/eiacs/sib/v1/transactiontime,5,0,0
