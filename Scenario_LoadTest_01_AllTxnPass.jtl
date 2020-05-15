@@ -1,5 +1,0 @@
-timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
-1588666686550,46,BP02_eIACSTransactionTime,200,"Number of samples in transaction : 1, number of failing samples : 0",TC02_eIACSTransactionTime 1-1,,true,,239,671,1,1,null,0,106,0
-1588666686614,46,Req_eIACSTransactionTime,200,OK,TC02_eIACSTransactionTime 1-1,text,true,,239,671,1,1,http://192.168.161.119/eiacs/sib/v1/transactiontime,44,0,22
-1588666686710,17,BP02_eIACSTransactionTime,200,"Number of samples in transaction : 1, number of failing samples : 0",TC02_eIACSTransactionTime 1-1,,true,,239,671,1,1,null,0,2,0
-1588666686710,17,Req_eIACSTransactionTime,200,OK,TC02_eIACSTransactionTime 1-1,text,true,,239,671,1,1,http://192.168.161.119/eiacs/sib/v1/transactiontime,17,0,0
