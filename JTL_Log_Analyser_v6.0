@@ -1,0 +1,1395 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "'1.2.3'"
+      ]
+     },
+     "execution_count": 1,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import pandas as pd\n",
+    "import time\n",
+    "from datetime import datetime\n",
+    "from pandas import ExcelWriter \n",
+    "import matplotlib.pyplot as plt\n",
+    "from matplotlib import dates as mpl_dates\n",
+    "from matplotlib.ticker import ScalarFormatter, FormatStrFormatter\n",
+    "#import seaborn as sns\n",
+    "#sns.set()\n",
+    "\n",
+    "pd.__version__\n",
+    "\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [
+    {
+     "ename": "NameError",
+     "evalue": "name 'temp' is not defined",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[1;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[1;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+      "\u001b[1;32m<ipython-input-2-786648e8c4ed>\u001b[0m in \u001b[0;36m<module>\u001b[1;34m\u001b[0m\n\u001b[0;32m      1\u001b[0m \u001b[1;31m# temp=1588744463872/1000\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[1;32m----> 2\u001b[1;33m \u001b[0mtime\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0mstrftime\u001b[0m\u001b[1;33m(\u001b[0m\u001b[1;34m'%Y-%m-%d %H:%M:%S'\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0mtime\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0mlocaltime\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mtemp\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0m",
+      "\u001b[1;31mNameError\u001b[0m: name 'temp' is not defined"
+     ]
+    }
+   ],
+   "source": [
+    "# temp=1588744463872/1000\n",
+    "time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(temp))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "'2020-05-06 13:54:39'"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "temp=1588744479826/1000\n",
+    "time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(temp))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "    # Total number of seconds between dates"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 87,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "'01:15:09'"
+      ]
+     },
+     "execution_count": 87,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "class JTLReader:\n",
+    "    def __init__(self,jtlPath):\n",
+    "        self.jtlPath=jtlPath\n",
+    "        self.jtlColumns = ['timeStamp', 'elapsed','label','threadName','dataType','bytes','sentBytes','URL','allThreads','success','responseCode','responseMessage']\n",
+    "        self.df_Jtl=pd.read_csv(self.jtlPath,usecols=self.jtlColumns,dtype={'label':'category'})#dtype={'label':'category'},nrows=195222    \n",
+    "        self.df_Jtl.sort_values(by=['timeStamp'],inplace=True) \n",
+    "        self.df_Jtl.reset_index(drop=True, inplace=True)\n",
+    "        self.shape=self.df_Jtl.shape\n",
+    "        self.rows=self.shape[0]\n",
+    "        self.rows\n",
+    "        \"\"\"Conver Epoc time to Actual Time Start\"\"\"\n",
+    "        self.df_Jtl['timeStamp'] = pd.to_datetime(self.df_Jtl['timeStamp'],unit='ms')\n",
+    "        self.df_Jtl['timeStamp'] = self.df_Jtl['timeStamp'].astype('datetime64[s]')#reduce precision pandas timestamp dataframe\n",
+    "        self.df_Jtl['timeStamp']=self.df_Jtl['timeStamp'].dt.tz_localize('utc').dt.tz_convert('Singapore')#Asia/Kolkata\n",
+    "        self.df_Jtl['timeStamp'] = self.df_Jtl['timeStamp'].astype(str).str[:-6]\n",
+    "        self.df_Jtl['timeStamp'] = pd.to_datetime(self.df_Jtl['timeStamp'])\n",
+    "        self.df_Jtl['timeStamp'] = self.df_Jtl['timeStamp'].astype('datetime64[s]')\n",
+    "        \"\"\"Conver Epoc time to Actual Time End\"\"\"\n",
+    "        \n",
+    "      \n",
+    "\n",
+    "        \"\"\"Saving master data frame to export to excel\"\"\"\n",
+    "        \n",
+    "        \n",
+    "        \"\"\"Filter Transaction Controller & HTTP Request\"\"\"\n",
+    "        self.filt=(pd.isnull(self.df_Jtl['URL'])) #& (pd.isnull(self.df_Jtl['dataType']))\n",
+    "        self.df_jtl_TC=self.df_Jtl.loc[self.filt]\n",
+    "        self.df_jtl_HTTPReqeust=self.df_Jtl.loc[~self.filt]\n",
+    "        \"\"\"Error Handling To be updated\"\"\"\n",
+    "        self.error_filt=(self.df_jtl_HTTPReqeust['success']==False) | (self.df_jtl_HTTPReqeust['success']==True)\n",
+    "        self.df_HttpErrors=self.df_jtl_HTTPReqeust.loc[self.error_filt]      \n",
+    "          \n",
+    "              \n",
+    "        \n",
+    "    \"\"\"def getTransactionControllerData(self):\n",
+    "        print(\"Hello shiva\")\n",
+    "        filt=(pd.isnull(self.df_Jtl['URL'])) & (pd.isnull(self.df_Jtl['dataType']))\n",
+    "        self.df_jtl_TC=self.df_Jtl.loc[filt]\n",
+    "        return self.df_jtl_TC\"\"\"\n",
+    "        \n",
+    "\n",
+    "        \n",
+    "    def converTimeStamp(self):\n",
+    "        self.df_Jtl['timeStamp'] = pd.to_datetime(self.df_Jtl['timeStamp'],unit='ms')\n",
+    "        self.df_Jtl['timeStamp'] = self.df_Jtl['timeStamp'].astype('datetime64[s]')#reduce precision pandas timestamp dataframe\n",
+    "        self.df_Jtl['timeStamp']=self.df_Jtl['timeStamp'].dt.tz_localize('utc').dt.tz_convert('Singapore')#Africa/Cairo\n",
+    "        self.df_Jtl['timeStamp'] = self.df_Jtl['timeStamp'].astype(str).str[:-6]\n",
+    "        self.df_Jtl['timeStamp'] = pd.to_datetime(self.df_Jtl['timeStamp'])\n",
+    "        self.df_Jtl['timeStamp'] = self.df_Jtl['timeStamp'].astype('datetime64[s]') \n",
+    "        \n",
+    "    def ms_to_sec(self):\n",
+    "         self.df_Jtl['elapsed']=((self.df_Jtl['elapsed'])/1000)\n",
+    "        \n",
+    "        \n",
+    "    def overAllResponseTimeSummary(self):\n",
+    "        self.df_overAllResponseTimeSummary=self.df_jtl_TC[['timeStamp','elapsed']]\n",
+    "        return self.df_overAllResponseTimeSummary\n",
+    "       \n",
+    "    def listOfErrors(self):\n",
+    "        return self.df_Jtl['responseCode'].value_counts()\n",
+    "    \n",
+    "    def shapeOfDaraFrame(self):\n",
+    "        return self.df_Jtl.shape\n",
+    "    \n",
+    "    def columnType(self,columnName):\n",
+    "        self.columnName=columnName\n",
+    "        return self.df_Jtl[self.columnName].dtype\n",
+    "    \n",
+    "    def getPeriod(self):\n",
+    "        self.startTime=self.df_Jtl['timeStamp'][0]\n",
+    "        self.endRow=self.df_Jtl['timeStamp'].shape[0]\n",
+    "        self.endTime=self.df_Jtl['timeStamp'][self.endRow-1]\n",
+    "        return f'{self.startTime} : {self.endTime}'\n",
+    "    \n",
+    "    def getDuration(self):\n",
+    "        self.startTime= self.df_Jtl['timeStamp'][0]\n",
+    "        self.endRow= self.df_Jtl['timeStamp'].shape[0]\n",
+    "        self.endTime= self.df_Jtl['timeStamp'][self.endRow-1]#-1\n",
+    "        self.executionStartTime=datetime(self.startTime.year,self.startTime.month,self.startTime.day,self.startTime.hour,self.startTime.minute,self.startTime.second)\n",
+    "        self.executionEndTime=datetime(self.endTime.year,self.endTime.month,self.endTime.day,self.endTime.hour,self.endTime.minute,self.endTime.second)\n",
+    "        self.timeDiff = self.executionEndTime-self.executionStartTime\n",
+    "        self.duration_in_s = self.timeDiff.total_seconds()\n",
+    "        self.duration=time.strftime(\"%H:%M:%S\", time.gmtime(self.duration_in_s))\n",
+    "        return self.duration\n",
+    "    \n",
+    "    def getMaxRunningVusers(self):\n",
+    "        self.allThread=self.df_Jtl['allThreads'].max()\n",
+    "        return self.allThread \n",
+    "    \n",
+    "      \n",
+    "    def getTotalHits(self):\n",
+    "        return self.df_jtl_HTTPReqeust.shape[0]\n",
+    "    \n",
+    "    def getAvgHitsPerSecond(self):\n",
+    "        return self.df_jtl_HTTPReqeust.shape[0]/self.duration_in_s\n",
+    "    \n",
+    "    def getTotalThroughput(self):\n",
+    "        self.totalThroughput=self.df_jtl_TC['bytes'].sum()\n",
+    "        return self.totalThroughput\n",
+    "    \n",
+    "    def getAvgThroughputPerSecond(self):\n",
+    "        self.avgThroughput=(self.df_jtl_TC['bytes'].sum())/self.duration_in_s\n",
+    "        return self.avgThroughput\n",
+    "    \n",
+    "    def getTotalPassFailFreqList(self):\n",
+    "        self.passFail_freq=self.df_jtl_TC['success'].value_counts().to_frame()\n",
+    "        #self.passFailFrequencyeqList=self.passFail_freq.index.tolist()\n",
+    "        \n",
+    "        return self.passFail_freq      \n",
+    "    \n",
+    "    def getTotalErrors(self):\n",
+    "        self.totalError=self.df_HttpErrors[['responseCode']].groupby(['responseCode'])\n",
+    "        self.totalError=self.df_HttpErrors['responseCode'].count()\n",
+    "        return self.totalError\n",
+    "\n",
+    "    def getAnalysisSummary(self):\n",
+    "        self.period=self.getPeriod()\n",
+    "        self.duration=self.getDuration()\n",
+    "        self.maxRunningVusers=self.getMaxRunningVusers()\n",
+    "        self.totalThroughput=self.getTotalThroughput()\n",
+    "        self.avgThroughputPerSecond=self.getAvgThroughputPerSecond()\n",
+    "        self.totalHits=self.getTotalHits()\n",
+    "        self.avgHitsPerSecond=self.getAvgHitsPerSecond()\n",
+    "        self.totalErrors=self.getTotalErrors()\n",
+    "        self.df_AnalysisSummary=pd.DataFrame(\n",
+    "            {\n",
+    "                'Data':[\n",
+    "                        'Period','Duration','Maximum Running Vusers','Total bytes',\n",
+    "                        'Average bytes/second','TotalHits','Average Hits Per Second',\n",
+    "                        'Total Error','Total Pass','Total Failed'\n",
+    "                ],\n",
+    "                'Values':[\n",
+    "                            self.period,self.duration,self.maxRunningVusers,self.totalThroughput,\n",
+    "                            self.avgThroughputPerSecond,self.totalHits,self.avgHitsPerSecond,\n",
+    "                            self.totalErrors,self.getTotalPassFailFreqList(),'NA'\n",
+    "                ]\n",
+    "                \n",
+    "            }\n",
+    "        )\n",
+    "        return self.df_AnalysisSummary\n",
+    "    \n",
+    "    def responseTimeSummary(self):\n",
+    "        self.df_responseTimeSummary=self.df_jtl_TC[['label','elapsed']]\n",
+    "        self.df_txnGroup=self.df_responseTimeSummary.groupby(['label'],observed=True )  #observed=True      \n",
+    "        self.df_txnGroup=self.df_txnGroup['elapsed'].describe(percentiles=[.90])#self.df_txnGroup.describe(percentiles=[.90])\n",
+    "        self.df_txnGroup.columns=self.df_txnGroup.columns.get_level_values(0)#self.df_txnGroup.columns=self.df_txnGroup.columns.get_level_values(1)\n",
+    "        self.df_txnGroup = self.df_txnGroup[['count','min','mean','90%','max',]]\n",
+    "        self.df_txnGroup.rename(columns={'count':'#Samples','min':'Min','mean':'Average','90%':'90 Percentile','max':'Max'},inplace=True)\n",
+    "        ##self.df_txnGroup=self.df_txnErrorGroup.reset_index() \"\"\"To be enable if you run describe () on data frame. Now we are running on specific column\"\"\"\n",
+    "        ##self.df_txnGroup['throughput']=self.df_txnGroup['count']/self.duration_in_s\n",
+    "        ##self.validTxn_filt=(self.df_txnGroup['count']>0)\n",
+    "        self.df_responseTimeSummaryOutput=self.df_txnGroup #self.df_txnGroup[self.validTxn_filt]\n",
+    "       \n",
+    "        return self.df_responseTimeSummaryOutput\n",
+    "    \n",
+    "    def getPassFailSummary(self):\n",
+    "        self.df_passFailSummary=self.df_jtl_TC[['label','success']]\n",
+    "        self.df_passFailGroup=self.df_passFailSummary.groupby(['label'],observed=True)#whe we use observed=True-->refer https://stackoverflow.com/questions/54922327/valueerror-operands-could-not-be-broadcast-together-with-shape-when-calling-pan?answertab=votes#tab-top\n",
+    "        self.df_txnGroup=self.df_passFailGroup['success'].value_counts()\n",
+    "        self.df_txnGroupSlice=self.df_txnGroup.loc[:,]\n",
+    "        self.df_passFailSummaryOutput=self.df_txnGroupSlice.unstack()\n",
+    "        self.df_passFailSummaryOutput=self.df_passFailSummaryOutput.fillna(0)\n",
+    "        self.df_passFailSummaryOutput.rename(columns={True:'Pass',False:'Fail'},inplace=True)\n",
+    "        return self.df_passFailSummaryOutput\n",
+    "    \n",
+    "    def getStartTimeOfEachGroup(self):\n",
+    "        self.transactionName=self.df_jtl_TC[['timeStamp','label']]\n",
+    "        self.transactionNameStartTimeByCatageory=self.transactionName.groupby('label', as_index = False,observed=True).nth(1)\n",
+    "        return self.transactionNameStartTimeByCatageory[['timeStamp','label']]\n",
+    "    \n",
+    "    def getEndTimeOfEachGroup(self):\n",
+    "        self.transactionName=self.df_jtl_TC[['timeStamp','label']]\n",
+    "        self.transactionNameEndTimeByCatageory=self.transactionName.groupby('label', as_index = False,observed=True).last()\n",
+    "        return self.transactionNameEndTimeByCatageory[['timeStamp','label']]\n",
+    "        \n",
+    "        \n",
+    "    \n",
+    "    def getReceiveSummary(self):\n",
+    "        print(self.duration_in_s)\n",
+    "        self.df_ReceiveSummary=self.df_jtl_TC[['label','bytes']]\n",
+    "        self.df_ReceiveSummary_grp=self.df_ReceiveSummary.groupby(['label'],observed=True)\n",
+    "        self.df_ReceiveSummary=self.df_ReceiveSummary.groupby('label', as_index = False,observed=True)['bytes'].sum()\n",
+    "        self.df_ReceiveSummary['bytes']=self.df_ReceiveSummary['bytes'].div(5107).round(2)\n",
+    "        self.df_ReceiveSummary['bytes']=self.df_ReceiveSummary['bytes'].div(1024).round(2)\n",
+    "        return  self.df_ReceiveSummary\n",
+    "        \n",
+    "        \n",
+    "    def getFinalResponseSummary(self):\n",
+    "        rs=pd.merge(self.df_responseTimeSummaryOutput,self.df_passFailSummaryOutput,left_index=True,right_index=True)\n",
+    "        if 'Fail' in rs.columns:# If transaction fail observed \n",
+    "            rs['Error%']=((rs['Fail'])/(rs['#Samples']))*100 \n",
+    "            rs=rs[['#Samples','Pass','Fail','Error%','Min','Average','90 Percentile','Max']]#'Fail','Error%'\n",
+    "            return rs\n",
+    "        else:# All transactions pass\n",
+    "            rs=rs[['#Samples','Pass','Min','Average','90 Percentile','Max']]\n",
+    "            \n",
+    "            return rs\n",
+    "            \n",
+    "            \n",
+    "    \n",
+    "    def getRunnerVuserGraphData(self):\n",
+    "        '''T=min,S=Seconds'''       \n",
+    "        self.df_vusers=self.df_jtl_TC[['timeStamp','allThreads']]\n",
+    "        self.df_vusers.sort_values(by=['timeStamp'])\n",
+    "        self.df_vusers.set_index('timeStamp',inplace=True)\n",
+    "        self.df_vusers_summary = pd.DataFrame()\n",
+    "        self.df_vusers_summary['Vusers']=self.df_vusers['allThreads'].resample('10S').max()  \n",
+    "        self.df_vusers_summary.ffill(inplace=True)\n",
+    "        return self.df_vusers_summary\n",
+    "         \n",
+    "        \n",
+    "    \n",
+    "    def getHitsPersecondGraphData(self):\n",
+    "        '''T=min,S=Seconds'''\n",
+    "        #self.df_jtl_HTTPReqeust['hits']=1\n",
+    "        self.df_hits=self.df_jtl_HTTPReqeust[['timeStamp','URL']]#self.df_jtl_HTTPReqeust[['timeStamp','hits']]\n",
+    "        #self.df_hits.sort_values(by=['timeStamp'])\n",
+    "        self.df_hits.set_index('timeStamp',inplace=True)\n",
+    "        self.df_hits_summary = pd.DataFrame()\n",
+    "        self.df_hits_summary['hitsCount']=self.df_hits['URL'].resample('1T').count()/60   \n",
+    "        #df.loc[(df!=0).any(axis=1)]\n",
+    "        self.df_hits_summary=self.df_hits_summary.loc[(self.df_hits_summary!=0).any(axis=1)]\n",
+    "        return self.df_hits_summary\n",
+    "        #return self.df_hits\n",
+    "    \n",
+    "    def getNetworkReceivedPerSecondGraphData(self):\n",
+    "        '''T=min,S=Seconds'''\n",
+    "        self.df_byteReceived=self.df_jtl_TC[['timeStamp','bytes']]\n",
+    "        #self.df_byteReceived.sort_values(by=['timeStamp'])\n",
+    "        self.df_byteReceived.set_index('timeStamp',inplace=True)\n",
+    "        self.df_byteReceived_summary = pd.DataFrame()\n",
+    "        self.df_byteReceived_summary['Received']=(self.df_byteReceived['bytes']).resample('1T').sum()/60\n",
+    "        return self.df_byteReceived_summary.astype(int)\n",
+    "        \n",
+    "    \n",
+    "    def getThrouhputSendPersecondGraphData(self):\n",
+    "        '''T=min,S=Seconds'''\n",
+    "        self.df_throughputsend=self.df_jtl_TC[['timeStamp','sentBytes']]\n",
+    "        #self.df_throughputsend.sort_values(by=['timeStamp'])\n",
+    "        self.df_throughputsend.set_index('timeStamp',inplace=True)\n",
+    "        self.df_throughputsend_summary = pd.DataFrame()\n",
+    "        self.df_throughputsend_summary['ThroughputSend']=self.df_throughputsend['sentBytes'].resample('1T').sum()/60    \n",
+    "        return self.df_throughputsend_summary.astype(int)\n",
+    "    \n",
+    "    def getErrorPersecondGraphData(self):\n",
+    "        '''T=min,S=Seconds'''\n",
+    "        self.df_errorCode=self.df_HttpErrors[['timeStamp','responseCode']]\n",
+    "        #self.df_throughputsend.sort_values(by=['timeStamp'])\n",
+    "        self.df_errorCode.set_index('timeStamp',inplace=True)\n",
+    "        self.df_errorCode_summary = pd.DataFrame()\n",
+    "        self.df_errorCode_summary['HTTPError']=self.df_errorCode['responseCode'].resample('1T').count() \n",
+    "        return self.df_errorCode_summary\n",
+    "    \n",
+    "    def gerErrorPivot(self):\n",
+    "        self.df_df_HttpErrors_pivot=self.df_HttpErrors[['timeStamp','responseCode','responseMessage']]\n",
+    "        return self.df_df_HttpErrors_pivot.pivot_table(index=pd.Grouper(freq='T',key='timeStamp'),columns=\"responseMessage\",aggfunc=\"count\")        \n",
+    " \n",
+    "    \n",
+    "    def getOverallResponseTime(self):\n",
+    "        return self.df_jtl_TC[['timeStamp','elapsed','label']]\n",
+    "    \n",
+    "    def getRawDataFrame(self):\n",
+    "        return self.df_Jtl\n",
+    "    \n",
+    "#     def get errorSummary(self):\n",
+    "#         self.filt_error=(self.df_jtl_HTTPReqeust['responseCode']!=200) & (self.df_jtl_HTTPReqeust['responseCode']!=202)\n",
+    "#         self.df_error=self.df_jtl_HTTPReqeust[self.filt_error]\n",
+    "#         return self.df_error\n",
+    "    \n",
+    "    def temp(self):\n",
+    "        self.slicer_grp=self.df_jtl_TC[['timeStamp','elapsed','label']]\n",
+    "        self.slicer_grp.sort_values(by=['timeStamp'])\n",
+    "        self.slicer_grp.set_index('timeStamp',inplace=True)\n",
+    "        self.df_response_summary_slicer = pd.DataFrame()\n",
+    "        self.df_slicer_txnGroup=self.slicer_grp.groupby(['label'],observed=True )\n",
+    "        self.df_response_summary_slicer=self.df_slicer_txnGroup['elapsed'].resample('30T').agg(['min','mean','max','count'])\n",
+    "        return self.df_response_summary_slicer\n",
+    "    \n",
+    "    def getDetailHttpErrors(self):\n",
+    "        self.df_errors=self.df_HttpErrors[['timeStamp','label','responseCode','responseMessage']]\n",
+    "        return  self.df_errors\n",
+    "    \n",
+    "    def getHttpErrorSummary(self):\n",
+    "        self.df_HttpErrorSummary=self.df_HttpErrors[['responseCode','responseMessage']].groupby(['responseCode'])\n",
+    "        self.df_HttpErrorSummary=self.df_HttpErrors['responseCode'].value_counts()\n",
+    "        return self.df_HttpErrorSummary\n",
+    "    \n",
+    "    \n",
+    "      \n",
+    "obj1=JTLReader(\"D:\\\\Projects\\\\JMR\\\\results\\\\LT_75Users.jtl\") \n",
+    "#obj1.converTimeStamp()\n",
+    "obj1.ms_to_sec() \n",
+    "obj1.getDuration()\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 91,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<class 'pandas.core.frame.DataFrame'>\n",
+      "Int64Index: 7 entries, 3 to 745\n",
+      "Data columns (total 2 columns):\n",
+      " #   Column     Non-Null Count  Dtype         \n",
+      "---  ------     --------------  -----         \n",
+      " 0   timeStamp  7 non-null      datetime64[ns]\n",
+      " 1   label      7 non-null      category      \n",
+      "dtypes: category(1), datetime64[ns](1)\n",
+      "memory usage: 795.0 bytes\n"
+     ]
+    }
+   ],
+   "source": [
+    "temp=obj1.getStartTimeOfEachGroup()\n",
+    "temp.info()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 89,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>timeStamp</th>\n",
+       "      <th>label</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>2020-12-28 16:22:56</td>\n",
+       "      <td>TC01_Txn01_URL</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>2020-12-28 16:23:07</td>\n",
+       "      <td>TC01_Txn02_Login</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>2020-12-28 16:23:19</td>\n",
+       "      <td>TC01_Txn03_UploadFile</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>2020-12-28 17:09:27</td>\n",
+       "      <td>TC01_Txn04_01_Validate_50Rec</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>2020-12-28 17:14:17</td>\n",
+       "      <td>TC01_Txn04_02_Validate_1000Rec</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>5</th>\n",
+       "      <td>2020-12-28 17:19:45</td>\n",
+       "      <td>TC01_Txn04_03_Validate_5KRec</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>6</th>\n",
+       "      <td>2020-12-28 17:23:06</td>\n",
+       "      <td>TC01_Txn04_04_Validate_10KRec</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "            timeStamp                           label\n",
+       "0 2020-12-28 16:22:56                  TC01_Txn01_URL\n",
+       "1 2020-12-28 16:23:07                TC01_Txn02_Login\n",
+       "2 2020-12-28 16:23:19           TC01_Txn03_UploadFile\n",
+       "3 2020-12-28 17:09:27    TC01_Txn04_01_Validate_50Rec\n",
+       "4 2020-12-28 17:14:17  TC01_Txn04_02_Validate_1000Rec\n",
+       "5 2020-12-28 17:19:45    TC01_Txn04_03_Validate_5KRec\n",
+       "6 2020-12-28 17:23:06   TC01_Txn04_04_Validate_10KRec"
+      ]
+     },
+     "execution_count": 89,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "temp1=obj1.getEndTimeOfEachGroup()\n",
+    "temp1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 86,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#obj1.gerErrorPivot()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 44,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#obj1.getHttpErrorSummary()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 45,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#y=obj1.getTotalPassFailFreqList()\n",
+    "#y"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 46,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#x=obj1.temp()\n",
+    "#x"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 47,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#obj1.df_Jtl"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 48,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#obj1.df_jtl_HTTPReqeust"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 49,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#obj1.df_jtl_TC"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 50,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#obj1.getPeriod()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 51,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#obj1.getDuration()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 52,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#obj1.getMaxRunningVusers()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 53,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#obj1.getTotalThroughput()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 54,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Data</th>\n",
+       "      <th>Values</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>Period</td>\n",
+       "      <td>2020-12-28 16:07:57 : 2020-12-28 17:23:06</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>Duration</td>\n",
+       "      <td>01:15:09</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>Maximum Running Vusers</td>\n",
+       "      <td>29</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>Total bytes</td>\n",
+       "      <td>401680737</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>Average bytes/second</td>\n",
+       "      <td>89084.217565</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>5</th>\n",
+       "      <td>TotalHits</td>\n",
+       "      <td>1083</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>6</th>\n",
+       "      <td>Average Hits Per Second</td>\n",
+       "      <td>0.240186</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>7</th>\n",
+       "      <td>Total Error</td>\n",
+       "      <td>1083</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>8</th>\n",
+       "      <td>Total Pass</td>\n",
+       "      <td>success\n",
+       "False      568\n",
+       "True       440</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>9</th>\n",
+       "      <td>Total Failed</td>\n",
+       "      <td>NA</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "                      Data                                        Values\n",
+       "0                   Period     2020-12-28 16:07:57 : 2020-12-28 17:23:06\n",
+       "1                 Duration                                      01:15:09\n",
+       "2   Maximum Running Vusers                                            29\n",
+       "3              Total bytes                                     401680737\n",
+       "4     Average bytes/second                                  89084.217565\n",
+       "5                TotalHits                                          1083\n",
+       "6  Average Hits Per Second                                      0.240186\n",
+       "7              Total Error                                          1083\n",
+       "8               Total Pass         success\n",
+       "False      568\n",
+       "True       440\n",
+       "9             Total Failed                                            NA"
+      ]
+     },
+     "execution_count": 54,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "\"\"\"Analysis Summery\"\"\"\n",
+    "analysisSummary=obj1.getAnalysisSummary()\n",
+    "analysisSummary\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\"\"\"responseTimeSummary\"\"\"\n",
+    "pd.set_option('display.max_rows',200)\n",
+    "responseTimeSummary=obj1.responseTimeSummary()\n",
+    "responseTimeSummary.head(100)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\"\"\"Get Pass and Fail Summary\"\"\"\n",
+    "passandfail=obj1.getPassFailSummary()\n",
+    "passandfail"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\"\"\"Get Final Response Summary\"\"\"\n",
+    "rs=obj1.getFinalResponseSummary()\n",
+    "rs"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\"\"\"Get Vuser Summary\"\"\"\n",
+    "runningVuser=obj1.getRunnerVuserGraphData()\n",
+    "runningVuser"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "\"\"\"Get Hits Summary\"\"\"\n",
+    "hitsPersecond=obj1.getHitsPersecondGraphData() \n",
+    "hitsPersecond"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\"\"\"Get Throughput Received Summery\"\"\"\n",
+    "Received=obj1.getNetworkReceivedPerSecondGraphData()\n",
+    "Received"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\"\"\"Get Throughput Send Summery\"\"\"\n",
+    "throughputsend=obj1.getThrouhputSendPersecondGraphData()\n",
+    "throughputsend"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\"\"\"Get Error Summary\"\"\"\n",
+    "errors=obj1.getErrorPersecondGraphData()\n",
+    "errors"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\"\"\"overAllResponseTimeSummary\"\"\"\n",
+    "overallResponseTime=obj1.getOverallResponseTime()\n",
+    "overallResponseTime"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "detailerrors=obj1.getDetailHttpErrors()\n",
+    "detailerrors"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "errorPivot=obj1.gerErrorPivot()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "obj1.getHttpErrorSummary()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "rawdataframe=obj1.getRawDataFrame()\n",
+    "rawdataframe"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\"\"\"Generate Excel Report\"\"\"\n",
+    "writer = ExcelWriter('PerformanceTestReport.xlsx',mode='w')\n",
+    "#Write Analysis Summary to Excel\n",
+    "analysisSummary.to_excel(writer,sheet_name='AnalysisSummary')\n",
+    "#write response summary to excel with txn name,min,avg,max,90% & max\n",
+    "rs.to_excel(writer,sheet_name='ResponseSummary')\n",
+    "#Write Running Vusers\n",
+    "runningVuser.to_excel(writer,sheet_name='RunningVuserSummary')\n",
+    "#Write Hits Summary\n",
+    "hitsPersecond.to_excel(writer,sheet_name='HitsSummary')\n",
+    "#Write Throughput Received Summary\n",
+    "Received.to_excel(writer,sheet_name='ReceivedSummary')\n",
+    "#Write Throughput Send Summary\n",
+    "throughputsend.to_excel(writer,sheet_name='ThroughputSendSummary')\n",
+    "#Write error summary\n",
+    "errors.to_excel(writer,sheet_name='ErrorGraph')\n",
+    "#Write ResponseTime\n",
+    "overallResponseTime.to_excel(writer,sheet_name='ResponseTimeGraph')\n",
+    "#Write Detail Errors\n",
+    "#detailerrors.to_excel(writer,sheet_name='DetailErrors')\n",
+    "#Write Error Pivot\n",
+    "errorPivot.to_excel(writer,sheet_name='ErrorPivot')\n",
+    "#Export Original dataframe\n",
+    "#rawdataframe.to_excel(writer,sheet_name='dataframe')\n",
+    "writer.save()\n",
+    "\n",
+    "\n",
+    "\n",
+    "\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#Draw Running Vuser Graph"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df_vuser=obj1.getRunnerVuserGraphData()\n",
+    "df_vuser.reset_index('timeStamp',inplace=True)\n",
+    "#Draw Graph\n",
+    "plt.style.use('fivethirtyeight')#print(plt.style.available)\n",
+    "plt.figure(figsize=(25,7))\n",
+    "plt.plot(df_vuser['timeStamp'],df_vuser['Vusers'],label='Vusers')#color=\"m\",linestyle='-',linewidth=3,marker='.' #Important Line x & Y axis #crimson\n",
+    "plt.title(\"Running Vusers\",fontsize=14,fontweight=\"bold\")\n",
+    "plt.xlabel(\"Time\",fontsize=13)#,fontweight=\"bold\"\n",
+    "plt.ylabel(\"Number of vuser\",fontsize=13)#,fontweight=\"bold\"\n",
+    "plt.legend(loc='upper left')#This will take label name from plt.plot. So no need to pass the labe in sequence order\n",
+    "plt.gcf().autofmt_xdate()#plt.xticks(rotation=45,fontsize=13)\n",
+    "date_format=mpl_dates.DateFormatter('%b, %d %Y')#To formate the x axis with date format\n",
+    "plt.gca().xaxis.set_major_formatter(date_format)#To formate the x axis with date format\n",
+    "plt.tight_layout()#Automatically render without padding issue #plt.grid(True)\n",
+    "plt.show()\n",
+    "#plt.savefig(\"Vuser.png\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Draw Hits Summary"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df_hits=obj1.getHitsPersecondGraphData()\n",
+    "df_hits.reset_index('timeStamp',inplace=True)\n",
+    "#Draw Graph\n",
+    "plt.style.use('fivethirtyeight')#print(plt.style.available)\n",
+    "plt.figure(figsize=(25,7))\n",
+    "plt.plot(df_hits['timeStamp'],df_hits['hitsCount'],label='Hits')#color=\"m\",linestyle='-',linewidth=3,marker='.' #Important Line x & Y axis #crimson\n",
+    "plt.title(\"Hits\",fontsize=14,fontweight=\"bold\")\n",
+    "plt.xlabel(\"Time\",fontsize=13)#,fontweight=\"bold\"\n",
+    "plt.ylabel(\"Hits\",fontsize=13)#,fontweight=\"bold\"\n",
+    "plt.legend(loc='upper left')#This will take label name from plt.plot. So no need to pass the labe in sequence order\n",
+    "plt.gcf().autofmt_xdate()#plt.xticks(rotation=45,fontsize=13)\n",
+    "date_format=mpl_dates.DateFormatter('%b, %d %Y')#To formate the x axis with date format\n",
+    "plt.gca().xaxis.set_major_formatter(date_format)#To formate the x axis with date format\n",
+    "plt.tight_layout()#Automatically render without padding issue #plt.grid(True)\n",
+    "plt.show()\n",
+    "#plt.savefig(\"Vuser.png\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Draw Throughput Received"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df_throughput=obj1.getThrouhputPersecondGraphData()\n",
+    "df_throughput.reset_index('timeStamp',inplace=True)\n",
+    "\n",
+    "\n",
+    "#Draw Graph\n",
+    "plt.style.use('fivethirtyeight')#print(plt.style.available)\n",
+    "plt.figure(figsize=(25,7))\n",
+    "plt.plot(df_throughput['timeStamp'],df_throughput['ThroughputReceived'],label='Throughput Received')#color=\"m\",linestyle='-',linewidth=3,marker='.' #Important Line x & Y axis #crimson\n",
+    "plt.title(\"Throughput Received\",fontsize=14,fontweight=\"bold\")\n",
+    "plt.xlabel(\"Time\",fontsize=13,fontweight=\"bold\")#,fontweight=\"bold\"\n",
+    "plt.ylabel(\"Bytes\",fontsize=13,fontweight=\"bold\")#,fontweight=\"bold\"\n",
+    "plt.legend(loc='upper left')#This will take label name from plt.plot. So no need to pass the labe in sequence order\n",
+    "plt.gcf().autofmt_xdate()#plt.xticks(rotation=45,fontsize=13)\n",
+    "ax = plt.gca()\n",
+    "ax.ticklabel_format(useOffset=False, style='plain', axis='y')#To remove scientifice numbers\n",
+    "date_format=mpl_dates.DateFormatter('%b, %d %Y')#To formate the x axis with date format\n",
+    "plt.gca().xaxis.set_major_formatter(date_format)#To formate the x axis with date format\n",
+    "plt.tight_layout()#Automatically render without padding issue #plt.grid(True)\n",
+    "plt.show()\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Draw Throughput Send"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df_throughput_send=obj1.getThrouhputSendPersecondGraphData()\n",
+    "df_throughput_send.reset_index('timeStamp',inplace=True)\n",
+    "\n",
+    "#Draw Graph\n",
+    "plt.style.use('fivethirtyeight')#print(plt.style.available)\n",
+    "plt.figure(figsize=(25,7))\n",
+    "plt.plot(df_throughput_send['timeStamp'],df_throughput_send['ThroughputSend'],label='Throughput Send')#color=\"m\",linestyle='-',linewidth=3,marker='.' #Important Line x & Y axis #crimson\n",
+    "plt.title(\"Throughput Send\",fontsize=14,fontweight=\"bold\")\n",
+    "plt.xlabel(\"Time\",fontsize=13,fontweight=\"bold\")#,fontweight=\"bold\"\n",
+    "plt.ylabel(\"Bytes\",fontsize=13,fontweight=\"bold\")#,fontweight=\"bold\"\n",
+    "plt.legend(loc='upper left')#This will take label name from plt.plot. So no need to pass the labe in sequence order\n",
+    "plt.gcf().autofmt_xdate()#plt.xticks(rotation=45,fontsize=13)\n",
+    "ax = plt.gca()\n",
+    "ax.ticklabel_format(useOffset=False, style='plain', axis='y')#To remove scientifice numbers\n",
+    "date_format=mpl_dates.DateFormatter('%b, %d %Y')#To formate the x axis with date format\n",
+    "plt.gca().xaxis.set_major_formatter(date_format)#To formate the x axis with date format\n",
+    "plt.tight_layout()#Automatically render without padding issue #plt.grid(True)\n",
+    "plt.show()\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Draw Error Grph"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df_errors=obj1.getErrorPersecondGraphData()\n",
+    "df_errors.reset_index('timeStamp',inplace=True)\n",
+    "\n",
+    "#Draw Graph\n",
+    "plt.style.use('fivethirtyeight')#print(plt.style.available)\n",
+    "plt.figure(figsize=(25,7))\n",
+    "plt.plot(df_errors['timeStamp'],df_errors['HTTPError'],label='Error Summary')#color=\"m\",linestyle='-',linewidth=3,marker='.' #Important Line x & Y axis #crimson\n",
+    "plt.title(\"Error Summary\",fontsize=14,fontweight=\"bold\")\n",
+    "plt.xlabel(\"Time\",fontsize=13,fontweight=\"bold\")#,fontweight=\"bold\"\n",
+    "plt.ylabel(\"Number of Errors\",fontsize=13,fontweight=\"bold\")#,fontweight=\"bold\"\n",
+    "plt.legend(loc='upper left')#This will take label name from plt.plot. So no need to pass the labe in sequence order\n",
+    "plt.gcf().autofmt_xdate()#plt.xticks(rotation=45,fontsize=13)\n",
+    "ax = plt.gca()\n",
+    "ax.ticklabel_format(useOffset=False, style='plain', axis='y')#To remove scientifice numbers\n",
+    "date_format=mpl_dates.DateFormatter('%b, %d %Y')#To formate the x axis with date format\n",
+    "plt.gca().xaxis.set_major_formatter(date_format)#To formate the x axis with date format\n",
+    "plt.tight_layout()#Automatically render without padding issue #plt.grid(True)\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Draw Vuser Plotly"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import plotly.offline as pyo\n",
+    "import plotly.graph_objs as go\n",
+    "import random\n",
+    "#'rgb(131, 90, 241)','rgb(127, 166, 238)','rgb(111, 231, 219)','rgb(184, 247, 212)'\n",
+    "colors = ['rgb(128,128,0)']\n",
+    "\n",
+    "df_vuser=obj1.getRunnerVuserGraphData()\n",
+    "df_vuser.reset_index('timeStamp',inplace=True)\n",
+    "\n",
+    "x_values=df_vuser['timeStamp']\n",
+    "y_values=df_vuser['Vusers']\n",
+    "\n",
+    "\n",
+    "trace1=go.Scatter(x=x_values,y=y_values,mode='lines',showlegend=True,stackgroup='one',name='runningvusers',line=dict(width=2, color=random.choice(colors)),connectgaps=True)#stackgroup='one',fillcolor='rgba(231,107,243,0.2)'\n",
+    "data=[trace1]\n",
+    "layout=go.Layout(title='Running Vuser Graph',xaxis=dict(title='Time'),yaxis=dict(title='Vusers'),hovermode='closest')\n",
+    "\n",
+    "fig=go.Figure(data=data,layout=layout)\n",
+    "fig.update_layout(\n",
+    "    template = 'plotly_dark',\n",
+    "    autosize=False,\n",
+    "    width=1200,\n",
+    "    height=400,\n",
+    "    plot_bgcolor='rgba(0,0,0,0)',    \n",
+    "    legend=dict(x=0.1,y=0.8,traceorder='normal'),\n",
+    "    title=dict(text='Running Vuser Graph',y=0.9,x=0.5,xanchor='center',yanchor='top'),\n",
+    "    title_font_family=\"Times New Roman\",\n",
+    "    title_font_color='rgb(255,255,255)',\n",
+    "\n",
+    "  annotations=[\n",
+    "        dict(xref='paper',x=0.90,y=40,xanchor='auto', yanchor='auto',font=dict(family='Arial',size=10),showarrow=False,\n",
+    "            text='Displays the number of Vusers that executed Vuser scripts,and their status,\\nduring each second of a load test.\\nThis graph is useful for determining the Vuser load on your server at any given moment')\n",
+    "    ]\n",
+    "\n",
+    ")\n",
+    "\n",
+    "#fig.update_xaxes(showgrid=True, gridwidth=0.1, gridcolor='rgb(105,105,105)')\n",
+    "#fig.update_yaxes(showgrid=True, gridwidth=0.1, gridcolor='rgb(105,105,105)')\n",
+    "\n",
+    "\n",
+    "pyo.plot(fig,filename='RunningVusers.html')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Draw Hits Plotly"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import plotly.offline as pyo\n",
+    "import plotly.graph_objs as go\n",
+    "import random\n",
+    "#'rgb(131, 90, 241)','rgb(127, 166, 238)','rgb(111, 231, 219)','rgb(184, 247, 212)'\n",
+    "colors = ['rgb(127, 166, 238)']\n",
+    "\n",
+    "df_hits=obj1.getHitsPersecondGraphData()\n",
+    "df_hits.reset_index('timeStamp',inplace=True)\n",
+    "\n",
+    "x_values=df_hits['timeStamp']\n",
+    "y_values=df_hits['hitsCount']\n",
+    "\n",
+    "\n",
+    "trace1=go.Scatter(x=x_values,y=y_values,mode='lines',showlegend=True,name='Hits',line=dict(width=2, color=random.choice(colors)),connectgaps=True)#stackgroup='one',fillcolor='rgba(231,107,243,0.2)'\n",
+    "data=[trace1]\n",
+    "layout=go.Layout(title='Hits Graph',xaxis=dict(title='Time'),yaxis=dict(title='Hits'),hovermode='closest')\n",
+    "\n",
+    "fig=go.Figure(data=data,layout=layout)\n",
+    "fig.update_layout(\n",
+    "    template = 'plotly_dark',\n",
+    "    autosize=False,\n",
+    "    width=1200,\n",
+    "    height=400,\n",
+    "    plot_bgcolor='rgba(0,0,0,0)',    \n",
+    "    legend=dict(x=0.8,y=1,traceorder='normal'),\n",
+    "    title=dict(text='Hits Graph',y=0.9,x=0.5,xanchor='center',yanchor='top'),\n",
+    "    title_font_family=\"Times New Roman\",\n",
+    "    title_font_color='rgb(255,255,255)',\n",
+    "\n",
+    "  annotations=[\n",
+    "        dict(xref='paper',x=0.90,y=40,xanchor='auto', yanchor='auto',font=dict(family='Arial',size=10),showarrow=False,\n",
+    "            text='Displays the number of hits made on the Web server by Vusers during each second of the load test.This graph helps you evaluate the amount of load Vusers generate, in terms of the number of hits')\n",
+    "    ]\n",
+    "\n",
+    ")\n",
+    "\n",
+    "#fig.update_xaxes(showgrid=True, gridwidth=0.1, gridcolor='rgb(105,105,105)')\n",
+    "#fig.update_yaxes(showgrid=True, gridwidth=0.1, gridcolor='rgb(105,105,105)')\n",
+    "\n",
+    "\n",
+    "pyo.plot(fig,filename='HitsGraph.html')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Draw Throughput Receive Graph"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import plotly.offline as pyo\n",
+    "import plotly.graph_objs as go\n",
+    "import random\n",
+    "#'rgb(131, 90, 241)','rgb(127, 166, 238)','rgb(111, 231, 219)','rgb(184, 247, 212)'\n",
+    "colors = ['rgb(111, 231, 219)']\n",
+    "\n",
+    "df_throughput=obj1.getThrouhputPersecondGraphData()\n",
+    "df_throughput.reset_index('timeStamp',inplace=True)\n",
+    "\n",
+    "x_values=df_throughput['timeStamp']\n",
+    "y_values=df_throughput['ThroughputReceived']\n",
+    "\n",
+    "\n",
+    "trace1=go.Scatter(x=x_values,y=y_values,mode='lines',showlegend=True,stackgroup='one',name='Throughput Received',line=dict(width=2, color=random.choice(colors)),connectgaps=True)#stackgroup='one',fillcolor='rgba(231,107,243,0.2)'\n",
+    "data=[trace1]\n",
+    "layout=go.Layout(title='Throughput Receive Graph',xaxis=dict(title='Time'),yaxis=dict(title='bytes'),hovermode='closest')\n",
+    "\n",
+    "fig=go.Figure(data=data,layout=layout)\n",
+    "fig.update_layout(\n",
+    "    template = 'plotly_dark',\n",
+    "    autosize=False,\n",
+    "    width=1200,\n",
+    "    height=400,\n",
+    "    plot_bgcolor='rgba(0,0,0,0)',    \n",
+    "    legend=dict(x=0.8,y=1,traceorder='normal'),\n",
+    "    title=dict(text='Throughput Receive Graph',y=0.9,x=0.5,xanchor='center',yanchor='top'),\n",
+    "    title_font_family=\"Times New Roman\",\n",
+    "    title_font_color='rgb(255,255,255)',\n",
+    "\n",
+    "  annotations=[  #['auto', 'left', 'center', 'right']        #['auto', 'top', 'middle', 'bottom']\n",
+    "        dict(xref='paper',x=0.90,y=90,xanchor='right', yanchor='top',font=dict(family='Arial',size=10),showarrow=False,\n",
+    "            text='Displays the amount of throughput (in bytes) on the Web server during the load test.Throughput represents the amount of data that the Vusers received from the server ')\n",
+    "    ]\n",
+    "\n",
+    ")\n",
+    "\n",
+    "#fig.update_xaxes(showgrid=True, gridwidth=0.1, gridcolor='rgb(105,105,105)')\n",
+    "#fig.update_yaxes(showgrid=True, gridwidth=0.1, gridcolor='rgb(105,105,105)')\n",
+    "\n",
+    "\n",
+    "pyo.plot(fig,filename='ThroughputReceiveGraph.html')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Draw Throughput Send Graph"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import plotly.offline as pyo\n",
+    "import plotly.graph_objs as go\n",
+    "import random\n",
+    "#'rgb(131, 90, 241)','rgb(127, 166, 238)','rgb(111, 231, 219)','rgb(184, 247, 212)'\n",
+    "colors = ['rgb(131, 90, 241)']\n",
+    "\n",
+    "df_throughput_send=obj1.getThrouhputSendPersecondGraphData()\n",
+    "df_throughput_send.reset_index('timeStamp',inplace=True)\n",
+    "\n",
+    "x_values=df_throughput_send['timeStamp']\n",
+    "y_values=df_throughput_send['ThroughputSend']\n",
+    "\n",
+    "\n",
+    "trace1=go.Scatter(x=x_values,y=y_values,mode='lines',showlegend=True,stackgroup='one',name='Throughput Send',line=dict(width=2, color=random.choice(colors)),connectgaps=True)#stackgroup='one',fillcolor='rgba(231,107,243,0.2)'\n",
+    "data=[trace1]\n",
+    "layout=go.Layout(title='Throughput Send Graph',xaxis=dict(title='Time'),yaxis=dict(title='bytes'),hovermode='closest')\n",
+    "\n",
+    "fig=go.Figure(data=data,layout=layout)\n",
+    "fig.update_layout(\n",
+    "    template = 'plotly_dark',\n",
+    "    autosize=False,\n",
+    "    width=1200,\n",
+    "    height=400,\n",
+    "    plot_bgcolor='rgba(0,0,0,0)',    \n",
+    "    legend=dict(x=0.8,y=1,traceorder='normal'),\n",
+    "    title=dict(text='Throughput Send Graph',y=0.9,x=0.5,xanchor='center',yanchor='top'),\n",
+    "    title_font_family=\"Times New Roman\",\n",
+    "    title_font_color='rgb(255,255,255)',\n",
+    "\n",
+    "  annotations=[  #['auto', 'left', 'center', 'right']        #['auto', 'top', 'middle', 'bottom']\n",
+    "        dict(xref='paper',x=1,y=90,xanchor='right', yanchor='top',font=dict(family='Arial',size=10),showarrow=False,\n",
+    "            text='Displays the amount of throughput (in bytes) on the Web server during the load test.Throughput represents the amount of data that the Vusers send to the server at any given second.This graph helps you to evaluate the amount of load ')\n",
+    "    ]\n",
+    "\n",
+    ")\n",
+    "\n",
+    "#fig.update_xaxes(showgrid=True, gridwidth=0.1, gridcolor='rgb(105,105,105)')\n",
+    "#fig.update_yaxes(showgrid=True, gridwidth=0.1, gridcolor='rgb(105,105,105)')\n",
+    "\n",
+    "\n",
+    "pyo.plot(fig,filename='ThroughputSendGraph.html')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Draw Error Graph"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import plotly.offline as pyo\n",
+    "import plotly.graph_objs as go\n",
+    "import random\n",
+    "#'rgb(131, 90, 241)','rgb(127, 166, 238)','rgb(111, 231, 219)','rgb(184, 247, 212)'\n",
+    "colors = ['rgb(127, 166, 238)']\n",
+    "\n",
+    "df_errors=obj1.getErrorPersecondGraphData()\n",
+    "df_errors.reset_index('timeStamp',inplace=True)\n",
+    "\n",
+    "x_values=df_errors['timeStamp']\n",
+    "y_values=df_errors['HTTPError']\n",
+    "\n",
+    "\n",
+    "trace1=go.Scatter(x=x_values,y=y_values,mode='lines',showlegend=True,stackgroup='one',name='Errors',line=dict(width=2, color=random.choice(colors)),connectgaps=True)#stackgroup='one',fillcolor='rgba(231,107,243,0.2)'\n",
+    "data=[trace1]\n",
+    "layout=go.Layout(title='Error Graph',xaxis=dict(title='Time'),yaxis=dict(title='Number of Errors'),hovermode='closest')\n",
+    "\n",
+    "fig=go.Figure(data=data,layout=layout)\n",
+    "fig.update_layout(\n",
+    "    template = 'plotly_dark',\n",
+    "    autosize=False,\n",
+    "    width=1200,\n",
+    "    height=400,\n",
+    "    plot_bgcolor='rgba(0,0,0,0)',    \n",
+    "    legend=dict(x=0.8,y=1,traceorder='normal'),\n",
+    "    title=dict(text='Errors Graph',y=0.9,x=0.5,xanchor='center',yanchor='top'),\n",
+    "    title_font_family=\"Times New Roman\",\n",
+    "    title_font_color='rgb(255,255,255)',\n",
+    "\n",
+    " \n",
+    ")\n",
+    "\n",
+    "#fig.update_xaxes(showgrid=True, gridwidth=0.1, gridcolor='rgb(105,105,105)')\n",
+    "#fig.update_yaxes(showgrid=True, gridwidth=0.1, gridcolor='rgb(105,105,105)')\n",
+    "\n",
+    "\n",
+    "pyo.plot(fig,filename='Errors.html')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.6"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
